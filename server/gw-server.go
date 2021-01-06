@@ -7,15 +7,22 @@ import (
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	pb "github.com/helloworlde/grpc-gateway/proto/api"
+	"github.com/simplesurance/grpcconsulresolver/consul"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/resolver"
 )
+
+func init() {
+	resolver.Register(consul.NewBuilder())
+}
 
 func StartGwServer() {
 	conn, err := grpc.DialContext(
 		context.Background(),
-		"0.0.0.0:9090",
+		"consul://127.0.0.1:8500/server?health=healthy",
 		grpc.WithBlock(),
 		grpc.WithInsecure(),
+		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy": "round_robin"}`),
 	)
 	if err != nil {
 		log.Fatalln("Failed to dial server: ", err)

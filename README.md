@@ -196,7 +196,7 @@ buf generete
 
 - 添加 gRPC Gateway 代理 Server
 
-启动 `0.0.0.0:9090` 就是要被代理的 Server 的地址，如果代理多个，则应该命名解析支持的格式
+启动 `0.0.0.0:9090` 就是要被代理的 Server 的地址，也支持使用注册中心或者 DNS，只需要 gRPC Gateway 添加相关命名解析的逻辑就可以
 
 ```go
 func StartGwServer() {
@@ -237,6 +237,39 @@ func main() {
 curl localhost:8090/hello\?message=world
 
 {"result":"Hello world"}%
+```
+
+#### 使用注册中心发现被代理的服务
+
+使用 [github.com/simplesurance/grpcconsulresolver/consul](github.com/simplesurance/grpcconsulresolver/consul) 作为 gRPC 服务发现的实现，解析 `server` 服务，当启动后就会自动从注册中心查找相关服务，根据负载均衡策略调用
+
+```diff
+import (
+	"context"
+	"log"
+	"net/http"
+
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	pb "github.com/helloworlde/grpc-gateway/proto/api"
++   "github.com/simplesurance/grpcconsulresolver/consul"
+	"google.golang.org/grpc"
++   "google.golang.org/grpc/resolver"
+)
+
++func init() {
++	resolver.Register(consul.NewBuilder())
++}
+
+func StartGwServer() {
+	conn, err := grpc.DialContext(
+		context.Background(),
+-		"0.0.0.0:9090",
++		"consul://127.0.0.1:8500/server?health=healthy",
+		grpc.WithBlock(),
+		grpc.WithInsecure(),
+	)
+    // ....
+}	
 ```
 
 ## 参考文档
