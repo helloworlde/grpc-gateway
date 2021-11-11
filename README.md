@@ -16,7 +16,7 @@ make all
 - 访问
 
 ```bash
-curl localhost:8090/hello\?message=world
+curl localhost:8090/hello?message=world
 
 {"result":"Hello world"}%
 ```
@@ -270,7 +270,7 @@ func StartGwServer() {
 - 启动应用
 
 ```bash
-curl localhost:8090/hello\?message=world
+curl localhost:8090/hello?message=world
 
 {"result":"Hello world"}%
 ```
